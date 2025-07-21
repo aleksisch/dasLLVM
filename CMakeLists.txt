@@ -120,7 +120,40 @@ IF ((NOT DAS_LLVM_INCLUDED) AND ${LLVM_FOUND} AND ((NOT ${DAS_LLVM_DISABLED}) OR
 	ADD_MODULE_DAS(llvm daslib llvm_jit_common)
 	ADD_LIBRARY(libDasModuleLlvm ${DAS_LLVM_MODULE_SRC} ${DAS_LLVM_MODULE_PLATFORM_SRC})
 
-	IF(WIN32)
+	IF (LINK_LLVM_STATIC) 
+		TARGET_LINK_LIBRARIES(libDasModuleLlvm PRIVATE Remarks LTO
+				# output of llvm-config --libs all
+				LLVMWindowsManifest LLVMXRay LLVMLibDriver LLVMDlltoolDriver LLVMCoverage
+				# LLVMLineEditor
+				LLVMXCoreDisassembler LLVMXCoreCodeGen LLVMXCoreDesc LLVMXCoreInfo LLVMX86TargetMCA LLVMX86Disassembler 
+				LLVMX86AsmParser LLVMX86CodeGen LLVMX86Desc LLVMX86Info LLVMWebAssemblyDisassembler 
+				LLVMWebAssemblyAsmParser LLVMWebAssemblyCodeGen LLVMWebAssemblyDesc LLVMWebAssemblyUtils 
+				LLVMWebAssemblyInfo LLVMVEDisassembler LLVMVEAsmParser LLVMVECodeGen LLVMVEDesc LLVMVEInfo 
+				LLVMSystemZDisassembler LLVMSystemZAsmParser LLVMSystemZCodeGen LLVMSystemZDesc LLVMSystemZInfo 
+				LLVMSparcDisassembler LLVMSparcAsmParser LLVMSparcCodeGen LLVMSparcDesc LLVMSparcInfo LLVMRISCVTargetMCA 
+				LLVMRISCVDisassembler LLVMRISCVAsmParser LLVMRISCVCodeGen LLVMRISCVDesc LLVMRISCVInfo LLVMPowerPCDisassembler 
+				LLVMPowerPCAsmParser LLVMPowerPCCodeGen LLVMPowerPCDesc LLVMPowerPCInfo LLVMNVPTXCodeGen LLVMNVPTXDesc LLVMNVPTXInfo 
+				LLVMMSP430Disassembler LLVMMSP430AsmParser LLVMMSP430CodeGen LLVMMSP430Desc LLVMMSP430Info LLVMMipsDisassembler 
+				LLVMMipsAsmParser LLVMMipsCodeGen LLVMMipsDesc LLVMMipsInfo LLVMLoongArchDisassembler LLVMLoongArchAsmParser 
+				LLVMLoongArchCodeGen LLVMLoongArchDesc LLVMLoongArchInfo LLVMLanaiDisassembler LLVMLanaiCodeGen LLVMLanaiAsmParser 
+				LLVMLanaiDesc LLVMLanaiInfo LLVMHexagonDisassembler LLVMHexagonCodeGen LLVMHexagonAsmParser LLVMHexagonDesc 
+				LLVMHexagonInfo LLVMBPFDisassembler LLVMBPFAsmParser LLVMBPFCodeGen LLVMBPFDesc LLVMBPFInfo LLVMAVRDisassembler 
+				LLVMAVRAsmParser LLVMAVRCodeGen LLVMAVRDesc LLVMAVRInfo LLVMARMDisassembler LLVMARMAsmParser LLVMARMCodeGen 
+				LLVMARMDesc LLVMARMUtils LLVMARMInfo LLVMAMDGPUTargetMCA LLVMAMDGPUDisassembler LLVMAMDGPUAsmParser 
+				LLVMAMDGPUCodeGen LLVMAMDGPUDesc LLVMAMDGPUUtils LLVMAMDGPUInfo LLVMAArch64Disassembler LLVMAArch64AsmParser 
+				LLVMAArch64CodeGen LLVMAArch64Desc LLVMAArch64Utils LLVMAArch64Info LLVMOrcJIT LLVMWindowsDriver LLVMMCJIT 
+				LLVMJITLink LLVMInterpreter LLVMExecutionEngine LLVMRuntimeDyld LLVMOrcTargetProcess LLVMOrcShared LLVMDWP 
+				LLVMDebugInfoLogicalView LLVMDebugInfoGSYM LLVMOption LLVMObjectYAML LLVMObjCopy LLVMMCA LLVMMCDisassembler 
+				LLVMLTO LLVMCFGuard LLVMFrontendOpenACC LLVMFrontendHLSL LLVMExtensions LLVMPasses LLVMCoroutines LLVMipo 
+				LLVMInstrumentation LLVMVectorize LLVMLinker LLVMFrontendOpenMP LLVMDWARFLinkerParallel LLVMDWARFLinker 
+				LLVMGlobalISel LLVMMIRParser LLVMAsmPrinter LLVMSelectionDAG LLVMCodeGen LLVMObjCARCOpts LLVMIRPrinter 
+				LLVMInterfaceStub LLVMFileCheck LLVMFuzzMutate LLVMTarget LLVMScalarOpts LLVMInstCombine 
+				LLVMAggressiveInstCombine LLVMTransformUtils LLVMBitWriter LLVMAnalysis LLVMProfileData LLVMSymbolize LLVMDebugInfoPDB 
+				LLVMDebugInfoMSF LLVMDebugInfoDWARF LLVMObject LLVMTextAPI LLVMMCParser LLVMIRReader LLVMAsmParser LLVMMC 
+				LLVMDebugInfoCodeView LLVMBitReader LLVMFuzzerCLI LLVMCore LLVMRemarks LLVMBitstreamReader LLVMBinaryFormat LLVMTargetParser 
+				LLVMTableGen LLVMSupport LLVMDemangle
+		)
+	ELSEIF(WIN32)
 		TARGET_LINK_LIBRARIES(libDasModuleLlvm PUBLIC LLVM-C LTO Remarks)
 	ELSE()
 		TARGET_LINK_LIBRARIES(libDasModuleLlvm PUBLIC LLVM LTO Remarks)
@@ -130,18 +163,26 @@ IF ((NOT DAS_LLVM_INCLUDED) AND ${LLVM_FOUND} AND ((NOT ${DAS_LLVM_DISABLED}) OR
 
 
 IF(WIN32)
-	set(DAS_CLANG_DLLS
-		${LLVM_INSTALL_PREFIX}/bin/LLVM-C.dll
-		${LLVM_INSTALL_PREFIX}/bin/LTO.dll
-		${LLVM_INSTALL_PREFIX}/bin/Remarks.dll
-		${LLVM_INSTALL_PREFIX}/bin/libclang.dll
-	)
+	if (LINK_LLVM_STATIC)
+		# TODO: remove once all llvm is statically linked
+		set(DAS_CLANG_DLLS
+			${LLVM_INSTALL_PREFIX}/bin/LTO.dll
+			${LLVM_INSTALL_PREFIX}/bin/Remarks.dll
+		)
+	else()
+		set(DAS_CLANG_DLLS
+			${LLVM_INSTALL_PREFIX}/bin/LLVM-C.dll
+			${LLVM_INSTALL_PREFIX}/bin/LTO.dll
+			${LLVM_INSTALL_PREFIX}/bin/Remarks.dll
+			${LLVM_INSTALL_PREFIX}/bin/libclang.dll
+		)
+	endif()
 	foreach(dll ${DAS_CLANG_DLLS})
 		get_filename_component(dll_name "${dll}" NAME)
 		add_custom_command(TARGET libDasModuleLlvm POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${dll}"
-			"${PROJECT_SOURCE_DIR}/bin/$<CONFIG>/${dll_name}"
+			"${LIB_LLVM_INSTALL_PATH}/${dll_name}"
 		)
 	endforeach()
 	install(FILES ${DAS_CLANG_DLLS}
