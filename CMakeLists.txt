@@ -177,6 +177,11 @@ IF(WIN32)
 			${LLVM_INSTALL_PREFIX}/bin/libclang.dll
 		)
 	endif()
+	if(CMAKE_GENERATOR MATCHES "Visual Studio")
+	    SET(LIB_LLVM_INSTALL_PATH "${PROJECT_SOURCE_DIR}/bin/$<CONFIG>")
+	else()
+	    SET(LIB_LLVM_INSTALL_PATH "${PROJECT_SOURCE_DIR}/bin")
+	endif()
 	foreach(dll ${DAS_CLANG_DLLS})
 		get_filename_component(dll_name "${dll}" NAME)
 		add_custom_command(TARGET libDasModuleLlvm POST_BUILD
