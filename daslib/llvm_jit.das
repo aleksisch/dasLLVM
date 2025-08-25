@@ -2386,7 +2386,7 @@ class LlvmJitVisitor : AstVisitor {
     }
 
 // ExprFor
-    def build_array_lock(array_ptr : LLVMOpaqueValue?; at: LineInfo) {
+    def build_array_lock(array_ptr : LLVMOpaqueValue?; at : LineInfo) {
         var params = fixed_array(
             LLVMBuildPointerCast(g_builder, array_ptr, LLVMPointerType(LLVMVoidType(), 0u), ""),             // array
             get_context_param(),
@@ -4809,7 +4809,7 @@ class LlvmJitVisitor : AstVisitor {
 
 // ExprTypeDecl
     def override visitExprTypeDecl(expr : smart_ptr<ExprTypeDecl>) : ExpressionPtr {
-        setE(expr, LLVMGetUndef(type_to_llvm_abi_type(expr._type)))
+        setE(expr, LLVMConstNull(type_to_llvm_abi_type(expr._type)))
         return expr
     }
 
@@ -5534,6 +5534,7 @@ def private fetch_lineinfo_from_dll(name : string) {
 [macro_function]
 def private fetch_uint64_from_dll(name : string) {
     assert(g_dynamic_lib_handle != null, "g_dynamic_lib_handle is null")
+    print("{name}\n");
     var sym = g_dynamic_lib_handle |> get_function_address(name)
     var val = unsafe(reinterpret<uint64?>(sym))
     return *val
@@ -5614,7 +5615,7 @@ def private generate_llvm(ctx : Context?; fn : FunctionPtr) {
         // debug("dll_function_aot_hash: {dll_function_aot_hash}")
         var written_hash = unsafe(reinterpret<uint64?>(dll_function_aot_hash))
         if (written_hash != null && get_function_aot_hash(fn |> get_ptr) == *written_hash) {
-            debug("function {get_mangled_name(fn)} taken from the dll with aot_hash {*written_hash}")
+            debug("function '{get_mangled_name(fn)}' taken from the dll with aot_hash {*written_hash}")
             return
         }
     }
@@ -5791,6 +5792,8 @@ class JIT_LLVM : AstSimulateMacro {
                         g_dynamic_lib_handle |> close_dynamic_library()
                         g_dynamic_lib_handle = null
                     }
+                } else {
+                    save_modules2mnh()
                 }
             }
             for (fun in funcs) {
