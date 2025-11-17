@@ -37,10 +37,10 @@ let public LLVM_DEBUG_INFO = false //  || LLVM_DEBUG_EVERYTHING
 let public LLVM_JIT_ALWAYS_SOLID = llvm_config::llvm_jit_always_solid()
 var public LLVM_JIT_ALLOW_UNALIGNED_VECTOR_READ_OUT_OF_BOUNDS = false
 
-let public LLVM_OUTPUT_OJBECT_FILE = false
+let public LLVM_OUTPUT_OJBECT_FILE = true
 let public LLVM_OUTPUT_OJBECT_FILE_NAME = "out/"
 
-let public LLVM_ENABLE_DLL_LOADING = false
+let public LLVM_ENABLE_DLL_LOADING = true
 let public JIT_DLL_OUTPUT = "out/"
 
 let public LLVM_ENABLE_OPT_PASS = LLVM_DEBUG_EVERYTHING ? false : true

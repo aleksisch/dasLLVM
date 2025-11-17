@@ -12,7 +12,7 @@ struct public DllName {
     name : string
 
     def DllName(s : string) {
-        name = s |> replace_multiple([("@", "`At`")])
+        name = s |> replace_multiple([("@", "`At`"), ("=", "`Eq`")])
     }
 
     def const impl() {

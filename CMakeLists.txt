@@ -128,7 +128,6 @@ IF ((NOT DAS_LLVM_INCLUDED) AND ${LLVM_FOUND} AND ((NOT ${DAS_LLVM_DISABLED}) OR
 	# ADD_DEPENDENCIES(libDasModuleLlvm)
 	TARGET_INCLUDE_DIRECTORIES(libDasModuleLlvm PUBLIC ${LLVM_INCLUDE_DIRS})
 
-
 IF(WIN32)
 	set(DAS_CLANG_DLLS
 		${LLVM_INSTALL_PREFIX}/bin/LLVM-C.dll
@@ -136,12 +135,17 @@ IF(WIN32)
 		${LLVM_INSTALL_PREFIX}/bin/Remarks.dll
 		${LLVM_INSTALL_PREFIX}/bin/libclang.dll
 	)
+    IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND (NOT CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
+        SET(DAS_LLVM_INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin")
+    ELSEIF()
+        SET(DAS_LLVM_INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin/$<CONFIG>")
+    ENDIF()
 	foreach(dll ${DAS_CLANG_DLLS})
 		get_filename_component(dll_name "${dll}" NAME)
 		add_custom_command(TARGET libDasModuleLlvm POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${dll}"
-			"${PROJECT_SOURCE_DIR}/bin/$<CONFIG>/${dll_name}"
+			"${DAS_LLVM_INSTALL_DIR}/${dll_name}"
 		)
 	endforeach()
 	install(FILES ${DAS_CLANG_DLLS}
